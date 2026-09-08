@@ -1,0 +1,7 @@
+*.json
+__pycache__
+*.log
+*.png
+*.html
+petswagger.py
+pru_flow.py
