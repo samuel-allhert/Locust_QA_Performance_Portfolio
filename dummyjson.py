@@ -57,10 +57,19 @@ class DummyJsonUser(HttpUser):
         ) as file:
             self.payload = json.load(file)
 
+        #================================================================================
+        #         
+        # 
+        # 
+        # FIRST API HIT
+        # 
+        # 
+        #================================================================================
+
         response = self.client.post(
             "/auth/login",
             json=self.payload,
-            name="POST /auth/login"
+            name="1 - POST /auth/login"
         )
 
         logging.info(
@@ -69,6 +78,15 @@ class DummyJsonUser(HttpUser):
             f"Status: {response.status_code} | "
             f"Response: {response.text}"
         )
+
+        #================================================================================
+        #         
+        # 
+        # 
+        # FIRST API HIT
+        # 
+        # 
+        #================================================================================
 
         time.sleep(125) #wait n seconds
 
