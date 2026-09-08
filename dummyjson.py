@@ -4,11 +4,13 @@ import logging
 import time
 import os
 import glob
+import gevent
 
 from locust import HttpUser, task, events, between
 from locust.exception import StopUser
 
 """
+To run, in cmd
 locust -f dummyjson.py -u 10 -r 0.1 --html=dummyjson_result.html > dummyjson.log 2>&1
 """
 
@@ -25,7 +27,7 @@ logger = logging.getLogger(__name__)
 # Store A list of folder inside folder named payloads
 CASE_FILES = [
     file
-    for file in glob.glob("payloads/*.json")
+    for file in glob.glob("payloads_1/*.json")
 ]
 
 # To allocate json, and handle race condition
@@ -50,12 +52,19 @@ class DummyJsonUser(HttpUser):
             #
             DummyJsonUser.user_counter += 1
             self.vuser_number = DummyJsonUser.user_counter
-    
+
+        # Allocate payload for vuser for the whole flow
         with open(
-            f"payloads/vuser{self.vuser_number}.json",
+            f"payloads_1/vuser{self.vuser_number}.json",
             "r"
         ) as file:
-            self.payload = json.load(file)
+            self.payload1 = json.load(file)
+
+        with open(
+            f"payloads_2/item{self.vuser_number}.json",
+            "r"
+        ) as file:
+            self.payload2 = json.load(file)
 
         #================================================================================
         #         
@@ -68,25 +77,40 @@ class DummyJsonUser(HttpUser):
 
         response = self.client.post(
             "/auth/login",
-            json=self.payload,
+            json=self.payload1,
             name="1 - POST /auth/login"
         )
 
         logging.info(
             f"nth Vuser: {DummyJsonUser.user_counter} | "
-            f"Payload: {self.payload} | "
+            f"Payload: {self.payload1} | "
             f"Status: {response.status_code} | "
             f"Response: {response.text}"
         )
+
+        gevent.sleep(3) # wait n seconds for the vuser
 
         #================================================================================
         #         
         # 
         # 
-        # FIRST API HIT
+        # SECOND API HIT
         # 
         # 
         #================================================================================
+
+        response = self.client.post(
+            "/products/add",
+            json=self.payload2,
+            name="2 - POST /products/add"
+        )
+
+        logging.info(
+            f"nth Vuser: {DummyJsonUser.user_counter} | "
+            f"Payload: {self.payload2} | "
+            f"Status: {response.status_code} | "
+            f"Response: {response.text}"
+        )
 
         time.sleep(125) #wait n seconds
 
@@ -102,10 +126,10 @@ class DummyJsonUser(HttpUser):
 
     def wait_and_quit(self):
     
-        time.sleep(60 * 3)
+        time.sleep(60 * 1)
     
         logger.info(
-            "===== 3 MINUTES FINISHED ====="
+            "===== 1 MINUTES FINISHED ====="
         )
     
         logger.info(
