@@ -46,7 +46,7 @@ class DummyJsonUser(HttpUser):
     @task
     def login(self):
         with DummyJsonUser.lock:
-            #If all json are already used, stop vuser eventhough they will keep spawning 
+            # If all json are already used, stop vuser eventhough they will keep spawning 
             if DummyJsonUser.user_counter >= len(CASE_FILES):
                 raise StopUser()
             #
@@ -65,6 +65,12 @@ class DummyJsonUser(HttpUser):
             "r"
         ) as file:
             self.payload2 = json.load(file)
+
+        with open(
+            f"payloads_3/recipe{self.vuser_number}.json",
+            "r"
+        ) as file:
+            self.payload3 = json.load(file)
 
         #================================================================================
         #         
@@ -112,7 +118,31 @@ class DummyJsonUser(HttpUser):
             f"Response: {response.text}"
         )
 
-        time.sleep(125) #wait n seconds
+        gevent.sleep(3) # wait n seconds for the vuser
+
+        #================================================================================
+        #         
+        # 
+        # 
+        # THIRD API HIT
+        # 
+        # 
+        #================================================================================
+
+        response = self.client.get(
+            "/recipes/search",
+            params=self.payload3,
+            name="3 - GET /recipes/search?{param}"
+        )
+
+        logging.info(
+            f"nth Vuser: {DummyJsonUser.user_counter} | "
+            f"Payload: {self.payload3} | "
+            f"Status: {response.status_code} | "
+            f"Response: {response.text}"
+        )
+        
+        time.sleep(150) #wait n seconds
 
         with DummyJsonUser.lock:
             DummyJsonUser.completed += 1
@@ -125,7 +155,11 @@ class DummyJsonUser(HttpUser):
                 ).start()
 
     def wait_and_quit(self):
-    
+
+        logger.info(
+            "===== START WAITING FOR 1 MINUTES ====="
+        )
+
         time.sleep(60 * 1)
     
         logger.info(
@@ -136,6 +170,6 @@ class DummyJsonUser(HttpUser):
             "===== QUITTING LOCUST ====="
         )
     
-        self.environment.runner.quit()
+        self.environment.runner.stop()
 
 
