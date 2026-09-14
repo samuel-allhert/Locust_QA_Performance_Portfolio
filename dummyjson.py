@@ -88,7 +88,7 @@ class DummyJsonUser(HttpUser):
         )
 
         logging.info(
-            f"nth Vuser: {DummyJsonUser.user_counter} | "
+            f"nth Vuser: {self.vuser_number} | "
             f"Payload: {self.payload1} | "
             f"Status: {response.status_code} | "
             f"Response: {response.text}"
@@ -112,7 +112,7 @@ class DummyJsonUser(HttpUser):
         )
 
         logging.info(
-            f"nth Vuser: {DummyJsonUser.user_counter} | "
+            f"nth Vuser: {self.vuser_number} | "
             f"Payload: {self.payload2} | "
             f"Status: {response.status_code} | "
             f"Response: {response.text}"
@@ -136,7 +136,7 @@ class DummyJsonUser(HttpUser):
         )
 
         logging.info(
-            f"nth Vuser: {DummyJsonUser.user_counter} | "
+            f"nth Vuser: {self.vuser_number} | "
             f"Payload: {self.payload3} | "
             f"Status: {response.status_code} | "
             f"Response: {response.text}"
